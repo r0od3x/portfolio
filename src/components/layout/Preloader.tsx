@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
 const SEEN_KEY = "mrg-intro-seen";
-const NAME = "MOHAMED REDA GHALBI";
 
 function introSeen() {
   try {
@@ -13,25 +12,24 @@ function introSeen() {
 }
 
 type PreloaderProps = {
-  /** The page underneath can start its intro (fires while the curtain opens). */
+  /** The page underneath can start its intro (fires as the panel lifts). */
   onReveal: () => void;
   /** The preloader has fully left the screen and can be unmounted. */
   onDone: () => void;
 };
 
+/**
+ * A big counter that runs to 100, then the whole panel lifts off the page.
+ * Plays once per browser session; skipped for reduced motion.
+ */
 export function Preloader({ onReveal, onDone }: PreloaderProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const topRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const nameRef = useRef<HTMLParagraphElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
-  const pctRef = useRef<HTMLSpanElement>(null);
+  const countRef = useRef<HTMLSpanElement>(null);
+  const barRef = useRef<HTMLSpanElement>(null);
   // Decided once per mount, so StrictMode's double effect run doesn't flip it.
   const [skip] = useState(() => prefersReducedMotion() || introSeen());
 
   useLayoutEffect(() => {
-    // Skip the full intro for reduced motion and for repeat visits in a session.
     if (skip) {
       onReveal();
       onDone();
@@ -43,54 +41,41 @@ export function Preloader({ onReveal, onDone }: PreloaderProps) {
       /* storage unavailable: the intro simply plays again next time */
     }
 
-    document.body.style.overflow = "hidden";
-    const counter = { val: 0 };
+    document.documentElement.style.overflow = "hidden";
+    const counter = { v: 0 };
 
     const ctx = gsap.context(() => {
-    const tl = gsap.timeline({
-      onComplete: () => {
-        document.body.style.overflow = "";
-        onDone();
-      },
-    });
-
-    tl.from(contentRef.current, { autoAlpha: 0, y: 14, duration: 0.5, ease: "power2.out" })
-      .fromTo(
-        nameRef.current,
-        { scrambleText: { text: " " } },
-        {
-          scrambleText: { text: NAME, chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ01", revealDelay: 0.3, speed: 0.6 },
-          duration: 1.4,
-          ease: "none",
-        },
-        0.1
-      )
-      .to(
-        counter,
-        {
-          val: 100,
-          duration: 1.5,
-          ease: "power3.inOut",
-          onUpdate: () => {
-            if (pctRef.current) pctRef.current.textContent = String(Math.round(counter.val)).padStart(3, "0");
-            if (barRef.current) barRef.current.style.transform = `scaleX(${counter.val / 100})`;
+      gsap
+        .timeline({
+          onComplete: () => {
+            document.documentElement.style.overflow = "";
+            onDone();
           },
-        },
-        0.1
-      )
-      .to(contentRef.current, { autoAlpha: 0, y: -16, scale: 0.98, duration: 0.45, ease: "power2.in" }, "+=0.1")
-      // Curtain: the two halves part from the middle.
-      .add("curtain", "-=0.1")
-      .to(topRef.current, { yPercent: -100, duration: 1, ease: "expo.inOut" }, "curtain")
-      .to(bottomRef.current, { yPercent: 100, duration: 1, ease: "expo.inOut" }, "curtain")
-      // Start the page intro as the curtain begins to part, so the headline
-      // is already rising when it comes into view.
-      .call(() => onReveal(), [], "curtain+=0.15");
+        })
+        .from(".pl-fade", { yPercent: 100, duration: 0.9, stagger: 0.05 })
+        .to(
+          counter,
+          {
+            v: 100,
+            duration: 1.6,
+            ease: "power3.inOut",
+            onUpdate: () => {
+              const v = Math.round(counter.v);
+              if (countRef.current) countRef.current.textContent = String(v).padStart(3, "0");
+              if (barRef.current) barRef.current.style.transform = `scaleX(${counter.v / 100})`;
+            },
+          },
+          0.1
+        )
+        .to(".pl-fade, .pl-count", { yPercent: -110, duration: 0.7, ease: "power3.in", stagger: 0.03 }, "+=0.15")
+        .add("lift", "-=0.15")
+        .to(rootRef.current, { yPercent: -100, duration: 1.1, ease: "expo.inOut" }, "lift")
+        .call(() => onReveal(), [], "lift+=0.25");
     }, rootRef);
 
     return () => {
       ctx.revert();
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -98,28 +83,36 @@ export function Preloader({ onReveal, onDone }: PreloaderProps) {
   if (skip) return null;
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-[9999]" aria-hidden>
-      <div ref={topRef} className="absolute inset-x-0 top-0 h-1/2 border-b border-outline-variant bg-surface" />
-      <div ref={bottomRef} className="absolute inset-x-0 bottom-0 h-1/2 bg-surface" />
+    <div
+      ref={rootRef}
+      aria-hidden
+      className="page-x fixed inset-0 z-[9999] flex flex-col justify-between bg-ink-2 pb-6 pt-6 will-change-transform"
+    >
+      <div className="label flex justify-between text-fg-2">
+        <span className="overflow-hidden">
+          <span className="pl-fade block">Reda Ghalbi — Portfolio 2026</span>
+        </span>
+        <span className="overflow-hidden">
+          <span className="pl-fade block">Casablanca, MA</span>
+        </span>
+      </div>
 
-      <div
-        ref={contentRef}
-        className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6"
-      >
-        <p className="font-mono text-sm tracking-tight text-on-surface">
-          M.R.G<span className="text-tertiary">/</span>
-        </p>
-        <p
-          ref={nameRef}
-          className="min-h-[1.5em] text-center font-mono text-[clamp(0.85rem,2.4vw,1.1rem)] tracking-[0.3em] text-on-surface-variant"
-        >
-          {NAME}
-        </p>
-        <div className="h-px w-48 overflow-hidden bg-outline-variant">
-          <div ref={barRef} className="h-full w-full origin-left scale-x-0 bg-tertiary" />
+      <div>
+        <div className="flex items-end justify-between gap-6">
+          <span className="overflow-hidden">
+            <span
+              ref={countRef}
+              className="pl-count tabular block text-[clamp(6rem,22vw,20rem)] font-medium leading-[0.85] tracking-[-0.06em]"
+            >
+              000
+            </span>
+          </span>
+          <span className="overflow-hidden pb-3">
+            <span className="pl-fade label block text-fg-3">Assembling pixels</span>
+          </span>
         </div>
-        <span className="font-mono text-xs tabular-nums text-on-surface-faint">
-          <span ref={pctRef}>000</span>%
+        <span className="mt-6 block h-px bg-line-2">
+          <span ref={barRef} className="block h-full origin-left scale-x-0 bg-accent" />
         </span>
       </div>
     </div>

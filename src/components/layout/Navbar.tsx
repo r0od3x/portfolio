@@ -1,206 +1,199 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { scrollToTarget } from "@/lib/scroll";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { RollText } from "@/components/ui/RollText";
+import { LiveClock } from "@/components/ui/LiveClock";
+import { profile } from "@/data/content";
 
-const NAV_ITEMS = [
+const NAV = [
   { label: "About", href: "#about" },
+  { label: "Work", href: "#work" },
   { label: "Experience", href: "#experience" },
-  { label: "Projects", href: "#projects" },
-  { label: "Stack", href: "#stack" },
-  { label: "Education", href: "#education" },
   { label: "Contact", href: "#contact" },
 ];
 
 export function Navbar({ ready }: { ready: boolean }) {
-  const [scrolled, setScrolled] = useState(false);
+  const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
-  const navRef = useRef<HTMLDivElement>(null);
-  const pillRef = useRef<HTMLSpanElement>(null);
-  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const barRef = useRef<HTMLElement>(null);
 
-  // Hidden until the page intro starts.
   useLayoutEffect(() => {
-    if (!prefersReducedMotion()) gsap.set(navRef.current, { yPercent: -100, autoAlpha: 0 });
+    if (!prefersReducedMotion()) gsap.set(barRef.current, { yPercent: -100 });
   }, []);
 
   useEffect(() => {
     if (!ready || prefersReducedMotion()) return;
-    gsap.to(navRef.current, { yPercent: 0, autoAlpha: 1, duration: 1.1, ease: "expo.out", delay: 0.6 });
+    gsap.to(barRef.current, { yPercent: 0, duration: 1.2, delay: 0.5 });
   }, [ready]);
 
-  // Background on scroll + hide on scroll down / reveal on scroll up.
+  // Solid background once scrolled; hide on the way down, return on the way up.
   useEffect(() => {
-    const nav = navRef.current;
-    if (!nav) return;
     const reduced = prefersReducedMotion();
-
+    let hidden = false;
     const st = ScrollTrigger.create({
       start: 0,
       end: "max",
       onUpdate: (self) => {
         const y = self.scroll();
-        setScrolled(y > 24);
+        setSolid(y > 40);
         if (reduced) return;
-        const hide = self.direction === 1 && y > window.innerHeight * 0.8;
-        gsap.to(nav, { yPercent: hide ? -100 : 0, duration: 0.5, ease: "power3.out", overwrite: "auto" });
+        const hide = self.direction === 1 && y > window.innerHeight * 0.6;
+        if (hide !== hidden) {
+          hidden = hide;
+          gsap.to(barRef.current, { yPercent: hide ? -100 : 0, duration: 0.6, overwrite: "auto" });
+        }
       },
     });
     return () => st.kill();
   }, []);
 
-  // Track which section is in view.
   useEffect(() => {
-    const triggers = NAV_ITEMS.map(({ href }) =>
+    const triggers = NAV.map(({ href }) =>
       ScrollTrigger.create({
         trigger: href,
         start: "top center",
         end: "bottom center",
-        onToggle: (self) =>
-          setActive((cur) => (self.isActive ? href : cur === href ? null : cur)),
+        onToggle: (self) => setActive((cur) => (self.isActive ? href : cur === href ? null : cur)),
       })
     );
     return () => triggers.forEach((t) => t.kill());
   }, []);
 
-  // Glide the pill under the active item.
-  useEffect(() => {
-    const pill = pillRef.current;
-    const target = active ? itemRefs.current[active] : null;
-    if (!pill) return;
-    if (!target) {
-      gsap.to(pill, { autoAlpha: 0, duration: 0.3 });
-      return;
-    }
-    gsap.to(pill, {
-      x: target.offsetLeft,
-      width: target.offsetWidth,
-      autoAlpha: 1,
-      duration: prefersReducedMotion() ? 0 : 0.6,
-      ease: "expo.out",
-    });
-  }, [active]);
-
-  const handleClick = (href: string) => {
+  const go = (href: string) => {
     setOpen(false);
     scrollToTarget(href);
   };
 
   return (
-    <div
-      ref={navRef}
-      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-500 ${
-        scrolled
-          ? "border-b border-outline-variant bg-surface/75 backdrop-blur-xl"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <nav className="container-px mx-auto flex h-20 max-w-7xl items-center justify-between">
-        <a
-          href="#top"
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToTarget(0);
-          }}
-          className="cursor-hover group flex items-center gap-3 font-mono text-sm font-medium tracking-tight text-on-surface"
-        >
-          <span className="relative h-8 w-8 shrink-0 rounded-full bg-brand-gradient p-[1.5px] transition-transform duration-500 group-hover:rotate-[-8deg] group-hover:scale-110">
-            <img
-              src="/avatar.webp"
-              alt=""
-              width={32}
-              height={32}
-              className="h-full w-full rounded-full border border-surface object-cover"
-            />
-          </span>
-          <span>
-            M.R.G
-            <span className="inline-block text-tertiary transition-transform duration-500 group-hover:rotate-[200deg]">
-              /
-            </span>
-          </span>
-        </a>
-
-        <ul className="relative hidden items-center gap-2 lg:flex">
-          <span
-            ref={pillRef}
-            aria-hidden
-            className="pointer-events-none absolute left-0 top-1/2 h-9 -translate-y-1/2 rounded-full border border-tertiary/30 bg-tertiary/10 opacity-0"
-          />
-          {NAV_ITEMS.map((item) => (
-            <li key={item.href}>
-              <button
-                ref={(el) => {
-                  itemRefs.current[item.href] = el;
-                }}
-                onClick={() => handleClick(item.href)}
-                aria-current={active === item.href ? "true" : undefined}
-                className={`cursor-hover relative rounded-full px-4 py-2 font-mono text-[13px] tracking-wide transition-colors duration-300 hover:text-on-surface ${
-                  active === item.href ? "text-on-surface" : "text-on-surface-variant"
-                }`}
-              >
-                {item.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className="hidden lg:block">
-          <button
-            onClick={() => handleClick("#contact")}
-            className="cursor-hover group inline-flex items-center gap-1.5 rounded-full border border-outline px-5 py-2.5 font-mono text-[13px] text-on-surface transition-colors hover:border-tertiary/60"
+    <>
+      <header
+        ref={barRef}
+        className={`page-x fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-500 ${
+          solid && !open ? "border-b border-line bg-ink/90" : "border-b border-transparent"
+        }`}
+      >
+        <nav className="grid h-[72px] grid-cols-2 items-center lg:grid-cols-3">
+          <a
+            href="#top"
+            onClick={(e) => {
+              e.preventDefault();
+              go("#top");
+            }}
+            className="roll-host flex items-center gap-3 justify-self-start"
           >
-            Let's talk
-            <ArrowUpRight
-              size={14}
-              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-            />
-          </button>
-        </div>
+            <img src="/avatar.webp" alt="" width={28} height={28} className="h-7 w-7 rounded-full" />
+            <span className="text-[15px] font-medium tracking-[-0.01em]">
+              <RollText>{profile.firstName + " " + profile.lastName}</RollText>
+            </span>
+          </a>
 
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          className="cursor-hover flex h-10 w-10 items-center justify-center rounded-full border border-outline text-on-surface lg:hidden"
-        >
-          {open ? <X size={18} /> : <Menu size={18} />}
-        </button>
-      </nav>
+          <ul className="hidden items-center gap-8 justify-self-center lg:flex">
+            {NAV.map((item) => (
+              <li key={item.href}>
+                <a
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    go(item.href);
+                  }}
+                  aria-current={active === item.href ? "true" : undefined}
+                  className={`roll-host flex items-center gap-2 text-[14px] transition-colors hover:text-fg ${
+                    active === item.href ? "text-fg" : "text-fg-2"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`h-1.5 w-1.5 bg-accent transition-transform duration-500 ${
+                      active === item.href ? "scale-100" : "scale-0"
+                    }`}
+                  />
+                  <RollText>{item.label}</RollText>
+                </a>
+              </li>
+            ))}
+          </ul>
 
-      {open && <MobileMenu onNavigate={handleClick} />}
-    </div>
+          <div className="flex items-center gap-6 justify-self-end">
+            <span className="label hidden text-fg-3 xl:inline">
+              Casablanca <LiveClock className="text-fg-2" />
+            </span>
+            <a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault();
+                go("#contact");
+              }}
+              className="roll-host hidden rounded-full border border-line-2 px-4 py-2 text-[14px] transition-colors hover:border-fg hover:bg-fg hover:text-ink lg:inline-flex"
+            >
+              <RollText>Let's talk</RollText>
+            </a>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              className="label rounded-full border border-line-2 px-4 py-2 text-fg lg:hidden"
+            >
+              {open ? "Close" : "Menu"}
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {open && <MobileMenu active={active} onNavigate={go} />}
+    </>
   );
 }
 
-function MobileMenu({ onNavigate }: { onNavigate: (href: string) => void }) {
+function MobileMenu({ active, onNavigate }: { active: string | null; onNavigate: (href: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (prefersReducedMotion()) return;
+    window.__lenis?.stop();
+    const reduced = prefersReducedMotion();
     const ctx = gsap.context(() => {
-      gsap.from(ref.current, { clipPath: "inset(0 0 100% 0)", duration: 0.6, ease: "expo.out" });
-      gsap.from("li", { y: 24, autoAlpha: 0, duration: 0.5, ease: "power3.out", stagger: 0.05, delay: 0.1 });
+      if (reduced) return;
+      gsap.from(ref.current, { clipPath: "inset(0 0 100% 0)", duration: 0.8, ease: "expo.inOut" });
+      gsap.from(".mm-item", { yPercent: 110, duration: 0.9, stagger: 0.06, delay: 0.25 });
+      gsap.from(".mm-foot", { autoAlpha: 0, y: 10, duration: 0.6, delay: 0.5 });
     }, ref);
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      window.__lenis?.start();
+    };
   }, []);
 
   return (
-    <div ref={ref} className="border-t border-outline-variant bg-surface px-6 pb-8 pt-4 lg:hidden">
+    <div id="mobile-menu" ref={ref} className="page-x fixed inset-0 z-40 flex flex-col bg-ink pb-8 pt-28 lg:hidden">
       <ul className="flex flex-col gap-1">
-        {NAV_ITEMS.map((item, i) => (
-          <li key={item.href}>
+        {[{ label: "Home", href: "#top" }, ...NAV].map((item, i) => (
+          <li key={item.href} className="overflow-hidden border-b border-line">
             <button
+              type="button"
               onClick={() => onNavigate(item.href)}
-              className="flex w-full items-baseline gap-4 py-3 text-left font-sans text-2xl font-semibold tracking-tight text-on-surface"
+              className="mm-item flex w-full items-baseline gap-4 py-4 text-left"
             >
-              <span className="font-mono text-xs text-tertiary">0{i + 1}</span>
-              {item.label}
+              <span className="label text-fg-3">0{i}</span>
+              <span
+                className={`text-[clamp(2.4rem,11vw,3.5rem)] font-medium leading-none tracking-[-0.04em] ${
+                  active === item.href ? "serif-i text-accent" : ""
+                }`}
+              >
+                {item.label}
+              </span>
             </button>
           </li>
         ))}
       </ul>
+      <div className="mm-foot label mt-auto flex justify-between text-fg-3">
+        <span>
+          Casablanca <LiveClock className="text-fg-2" />
+        </span>
+        <a href={`mailto:${profile.email}`} className="text-fg-2">
+          Email ↗
+        </a>
+      </div>
     </div>
   );
 }

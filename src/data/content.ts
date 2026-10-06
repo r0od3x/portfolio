@@ -1,86 +1,56 @@
+// All site copy lives here. Facts come from the CV and github.com/r0od3x.
+
 export const profile = {
   name: "Mohamed Reda Ghalbi",
   firstName: "Reda",
+  lastName: "Ghalbi",
   role: "AI & Data Science Engineering Student",
   location: "Casablanca, Morocco",
-  education: "Engineering degree in Computer Science, AI & Data Science track",
+  timeZone: "Africa/Casablanca",
   school: "EMSI Casablanca",
   email: "ghalbimohamedreda@gmail.com",
+  availability: "Open to a PFE or internship, 2026–27",
   socials: {
     github: "https://github.com/r0od3x",
     linkedin: "https://www.linkedin.com/in/mohamed-reda-ghalbi-941b1126b/",
     resume: "/resume.pdf",
   },
-  languages: [
-    { name: "Arabic", level: "Native" },
-    { name: "French", level: "Fluent" },
-    { name: "English", level: "Fluent" },
-    { name: "German", level: "Beginner" },
+};
+
+export const about = {
+  // Rendered with a scroll-driven reading effect; *asterisks* mark serif accents.
+  statement:
+    "Most of what I build starts in a notebook and ends somewhere less *glamorous*: an API, a mobile app, a pipeline that runs every night. I've done that for FedEx, for a paper & cardboard manufacturer, and this summer for a *bank*. Off the keyboard I'm on a judo mat. I took silver at the national Coupe du Trône in 2024, and I referee now too.",
+  facts: [
+    { label: "Based in", value: "Casablanca, Morocco", note: "GMT+1" },
+    { label: "Studying", value: "AI & Data Science engineering, EMSI", note: "2022 → 2027" },
+    { label: "Speaks", value: "Arabic, French, English", note: "+ a little German" },
+    { label: "Off-screen", value: "Judoka & referee", note: "Silver, Coupe du Trône '24" },
   ],
 };
 
-// Same lines as the typing banner on github.com/r0od3x.
-export const terminalLines = [
-  "building ML models, LLM agents & apps",
-  "training neural networks that see food",
-  "orchestrating LLM agents with LangGraph",
-  "shipping full-stack web & mobile apps",
-  "teaching a snake to play itself",
+export const marqueeWords = [
+  "Computer vision",
+  "LLM agents",
+  "Forecasting",
+  "Data pipelines",
+  "Full-stack",
+  "Deep learning",
 ];
 
-export const heroMetrics = [
-  {
-    value: 36.4,
-    suffix: " kcal",
-    label: "Calorie MAE on Nutrition5K, 17.3% below Google Research's baseline",
-  },
-  { value: 3, suffix: "", label: "Industry internships: banking, manufacturing, logistics" },
-  { value: 5, suffix: "", label: "DeepLearning.AI deep learning courses completed" },
-];
-
-export type SkillGroup = {
-  id: string;
-  title: string;
-  skills: string[];
-};
+export type SkillGroup = { id: string; title: string; skills: string[] };
 
 export const skillGroups: SkillGroup[] = [
-  {
-    id: "frontend",
-    title: "Frontend & Mobile",
-    skills: ["React", "JavaScript", "HTML / CSS", "Flutter", "React Native", "Streamlit"],
-  },
-  {
-    id: "ai",
-    title: "LLMs & Agents",
-    skills: ["LangGraph", "LangChain", "RAG", "ChromaDB", "OpenAI API", "Claude API", "Prompt Engineering"],
-  },
-  {
-    id: "dl",
-    title: "Deep Learning",
-    skills: ["PyTorch", "EfficientNet", "ResNet", "Multi-task Regression", "Deep Q-Learning", "OpenCV"],
-  },
-  {
-    id: "ml",
-    title: "Machine Learning & Data",
-    skills: ["Scikit-learn", "Pandas", "NumPy", "Matplotlib", "Seaborn", "Time-series Forecasting"],
-  },
-  {
-    id: "backend",
-    title: "Backend & APIs",
-    skills: ["Python", "FastAPI", "Flask", "Node.js / Express", "ASP.NET Core", "Laravel", "REST APIs"],
-  },
-  {
-    id: "databases",
-    title: "Data Engineering",
-    skills: ["SQL", "PostgreSQL", "MongoDB", "ETL Pipelines", "OCR (Tesseract)", "XML"],
-  },
-  {
-    id: "tools",
-    title: "Tools",
-    skills: ["Git", "Linux", "Google Colab", "Kaggle", "Jupyter"],
-  },
+  { id: "dl", title: "Deep learning", skills: ["PyTorch", "EfficientNet", "ResNet", "Multi-task regression", "Deep Q-Learning", "OpenCV"] },
+  { id: "ai", title: "LLMs & agents", skills: ["LangGraph", "LangChain", "RAG", "ChromaDB", "OpenAI & Claude APIs", "MCP"] },
+  { id: "ml", title: "ML & data", skills: ["Scikit-learn", "Pandas", "NumPy", "Time-series forecasting", "Matplotlib", "Seaborn"] },
+  { id: "data", title: "Data engineering", skills: ["SQL", "PostgreSQL", "MongoDB", "ETL pipelines", "Tesseract OCR"] },
+  { id: "backend", title: "Backend", skills: ["Python", "FastAPI", "Flask", "Node / Express", "ASP.NET Core", "Laravel"] },
+  { id: "frontend", title: "Interfaces", skills: ["React", "Flutter", "React Native", "Streamlit", "HTML / CSS"] },
+  { id: "tools", title: "Daily tools", skills: ["Git", "Linux", "Jupyter", "Google Colab", "Kaggle"] },
 ];
+
+export type Figure = "nutrivision" | "medai" | "customs" | "sugarsight";
 
 export type Project = {
   slug: string;
@@ -88,11 +58,13 @@ export type Project = {
   name: string;
   tagline: string;
   description: string;
-  problem: string;
-  approach: string[];
+  highlights: string[];
   stack: string[];
   metrics: { label: string; value: string }[];
   context: string;
+  year: string;
+  figure: Figure;
+  figureCaption: string;
   repo?: string;
 };
 
@@ -101,92 +73,92 @@ export const projects: Project[] = [
     slug: "nutrivision-ai",
     index: "01",
     name: "NutriVision AI",
-    tagline: "Calories and macros from a single food photo",
+    tagline: "Calories and macros from one photo of a meal.",
     description:
-      "A deep learning system that looks at a photo of a meal and directly predicts its calories, mass, protein, fat and carbohydrates, with no food-database lookup. Served by a FastAPI backend and used from a Flutter mobile app.",
-    problem:
-      "Food logging is tedious enough that most people give up within weeks. Most of that friction comes from manual entry, so the goal was to get a nutrition estimate from one photo.",
-    approach: [
-      "Fine-tuned an ImageNet-pretrained EfficientNet-B3 with a multi-task regression head on Nutrition5K (lab-measured cafeteria dishes)",
-      "Huber loss on z-score-normalised targets, AdamW, warm-up + cosine schedule, then selective fine-tuning of the last 100 backbone layers",
-      "Served the model behind a FastAPI /predict endpoint consumed by a Flutter camera/gallery app",
-      "Added LLM-generated nutrition coaching (Claude / GPT-4) on top of the predictions",
+      "A fine-tuned EfficientNet-B3 that looks at a dish and predicts calories, mass, protein, fat and carbs directly, with no food database lookup. FastAPI serves it; a Flutter app puts it in your hand.",
+    highlights: [
+      "Multi-task regression head on Nutrition5K (lab-measured cafeteria dishes)",
+      "Huber loss, warm-up + cosine schedule, selective fine-tuning of the backbone",
+      "LLM-written nutrition coaching on top of the predictions",
     ],
-    stack: ["PyTorch", "EfficientNet-B3", "FastAPI", "Flutter", "LLM APIs"],
+    stack: ["PyTorch", "EfficientNet-B3", "FastAPI", "Flutter"],
     metrics: [
-      { label: "Calorie MAE on Nutrition5K", value: "36.4 kcal" },
-      { label: "vs. Google Research baseline (44.0)", value: "−17.3%" },
+      { label: "Calorie MAE, Nutrition5K", value: "36.4 kcal" },
+      { label: "vs. Google Research baseline", value: "−17.3%" },
     ],
-    context: "Academic project · Team of 2 · 2026",
+    context: "Academic · team of 2",
+    year: "2026",
+    figure: "nutrivision",
+    figureCaption: "Photo in, five numbers out",
     repo: "https://github.com/r0od3x/NutriVision-AI",
   },
   {
     slug: "medai",
     index: "02",
-    name: "MedAI: Multi-Agent Pre-Consultation",
-    tagline: "LangGraph agents for triage, validation and reporting",
+    name: "MedAI",
+    tagline: "Medical pre-consultation, run by a team of agents.",
     description:
-      "An AI-assisted medical pre-consultation platform built as a multi-agent LangGraph pipeline: a triage agent interviews the patient, a doctor validates and prescribes, and a synthesis agent writes the final report.",
-    problem:
-      "Consultations lose time on intake: collecting symptoms and writing up notes. The aim was to automate that part while keeping a doctor in the loop for every decision.",
-    approach: [
-      "Orchestrator → triage → doctor-validation → synthesis graph with shared consultation state in LangGraph",
-      "Adaptive questionnaire and LLM clinical analysis: key symptoms, hypotheses, red flags, initial care",
-      "FastAPI backend with Swagger docs and a Streamlit interface, plus resumable consultation history",
-      "Medical resource hub exposed through an MCP module",
+      "A LangGraph pipeline where a triage agent interviews the patient, a doctor validates and prescribes, and a synthesis agent writes the report. The doctor stays in the loop for every decision.",
+    highlights: [
+      "Orchestrator → triage → doctor validation → synthesis, with shared state",
+      "Adaptive questionnaire; LLM flags symptoms, hypotheses and red flags",
+      "FastAPI backend, Streamlit UI, resumable consultation history",
     ],
-    stack: ["LangGraph", "LangChain", "OpenAI", "FastAPI", "Streamlit", "MCP"],
+    stack: ["LangGraph", "LangChain", "OpenAI", "FastAPI", "Streamlit"],
     metrics: [
-      { label: "Agents in the pipeline", value: "4" },
-      { label: "Human-in-the-loop", value: "Doctor validation" },
+      { label: "Agents in the graph", value: "4" },
+      { label: "Human in the loop", value: "Always" },
     ],
-    context: "Academic project · 2026",
+    context: "Academic",
+    year: "2026",
+    figure: "medai",
+    figureCaption: "One consultation, four hand-offs",
     repo: "https://github.com/r0od3x/projet_agentic_med_ai",
   },
   {
-    slug: "gestion-facture",
+    slug: "customs",
     index: "03",
-    name: "Customs Certificate Automation",
-    tagline: "OCR + PostgreSQL desktop app for a paper & cardboard manufacturer",
+    name: "Customs certificates",
+    tagline: "A folder of PDFs becomes a finished certificate.",
     description:
-      "A Windows desktop application built during my internship at GPC that turns a folder of product sheets and invoices (PDF) into finished customs certificates, replacing a manual, spreadsheet-driven process.",
-    problem:
-      "Preparing temporary-admission customs certificates meant reading PDFs by hand, computing paper composition and weights, and allocating quantities against customs declarations. It was slow and easy to get wrong.",
-    approach: [
-      "Extraction pipeline: native PDF text via pdfminer, Tesseract OCR fallback for scanned documents",
-      "Computed paper composition and gross / net / declarable weights per product",
-      "FIFO allocation against the customs-declaration ledger in PostgreSQL, updating remaining balances",
-      "Generated certificates and calculation sheets from Excel templates, exported to XLSX and PDF",
+      "Built during my internship at GPC, a paper & cardboard manufacturer. It reads product sheets and invoices, computes paper weights, allocates them against customs declarations and fills in the paperwork.",
+    highlights: [
+      "pdfminer for native text, Tesseract OCR fallback for scans",
+      "FIFO allocation against the declarations ledger in PostgreSQL",
+      "Certificates generated from Excel templates, exported to XLSX + PDF",
     ],
-    stack: ["Python", "Tesseract OCR", "PostgreSQL", "CustomTkinter", "xlwings"],
+    stack: ["Python", "Tesseract", "PostgreSQL", "CustomTkinter", "xlwings"],
     metrics: [
       { label: "Input", value: "PDF folder" },
-      { label: "Output", value: "XLSX + PDF certificates" },
+      { label: "Output", value: "XLSX + PDF" },
     ],
-    context: "Internship · GPC · 2025",
+    context: "Internship · GPC",
+    year: "2025",
+    figure: "customs",
+    figureCaption: "Scan, extract, allocate, print",
     repo: "https://github.com/r0od3x/gestionfacture",
   },
   {
     slug: "sugarsight",
     index: "04",
     name: "SugarSight",
-    tagline: "Diabetes risk prediction web app",
+    tagline: "Diabetes risk from eight numbers.",
     description:
-      "A web application that estimates a patient's diabetes risk from eight medical indicators, with a REST API for integration and LLM-written replies to user feedback.",
-    problem:
-      "A risk model is only useful if people can reach it, so the model needed a usable interface and an API, not just a notebook.",
-    approach: [
-      "Trained a Random Forest on the Pima Indians Diabetes dataset with engineered features (Glucose × BMI ratios)",
-      "Served predictions through FastAPI: web form plus a documented POST /predict endpoint",
-      "Feedback form whose replies are generated by the OpenAI API and sent by email",
-      "Environment-based configuration with no secrets in code",
+      "A Random Forest trained on the Pima Indians dataset, served through FastAPI as a web form and a REST endpoint, with LLM-written replies to user feedback.",
+    highlights: [
+      "Engineered features from Glucose × BMI ratios",
+      "Documented POST /predict endpoint for other apps",
+      "Environment-based config, no secrets in code",
     ],
-    stack: ["Scikit-learn", "FastAPI", "OpenAI API", "Bootstrap", "GSAP"],
+    stack: ["Scikit-learn", "FastAPI", "OpenAI API", "GSAP"],
     metrics: [
       { label: "Test accuracy", value: "~81%" },
-      { label: "Model", value: "Random Forest" },
+      { label: "Input features", value: "8" },
     ],
-    context: "Academic project · 2025",
+    context: "Academic",
+    year: "2025",
+    figure: "sugarsight",
+    figureCaption: "Eight indicators, one forest, one answer",
     repo: "https://github.com/r0od3x/SugarSight",
   },
 ];
@@ -194,187 +166,151 @@ export const projects: Project[] = [
 export type MiniProject = {
   name: string;
   description: string;
-  stack: string[];
+  stack: string;
+  year: string;
   repo: string;
 };
 
-export const moreProjects: MiniProject[] = [
+export const archive: MiniProject[] = [
   {
-    name: "Snake AI: Deep Q-Learning",
-    description:
-      "An agent that teaches itself Snake from scratch using experience replay and ε-greedy exploration. The shipped model averages ~30 points per game.",
-    stack: ["PyTorch", "Pygame", "Reinforcement Learning"],
+    name: "Snake, Deep Q-Learning",
+    description: "An agent that teaches itself Snake. Averages ~30 points a game.",
+    stack: "PyTorch · Pygame",
+    year: "2026",
     repo: "https://github.com/r0od3x/snake-ai-dqn",
   },
   {
-    name: "Agentic RAG Labs",
-    description:
-      "From prompt engineering to RAG over PDFs (ChromaDB, LLM-judged groundedness) to tool-calling agentic RAG with LangGraph.",
-    stack: ["LangChain", "LangGraph", "ChromaDB", "Streamlit"],
+    name: "Agentic RAG labs",
+    description: "Prompting → RAG over PDFs → tool-calling agents.",
+    stack: "LangGraph · ChromaDB",
+    year: "2026",
     repo: "https://github.com/r0od3x/TP_multiai",
   },
   {
-    name: "Renting: Rental Platform",
-    description:
-      "Airbnb-style full-stack platform with renter, seller and admin roles, JWT auth with role claims, BCrypt hashing and review gating.",
-    stack: ["ASP.NET Core 8", "MongoDB", "React"],
+    name: "Renting",
+    description: "Airbnb-style platform: renters, sellers, admins, JWT roles.",
+    stack: "ASP.NET Core · MongoDB · React",
+    year: "2025",
     repo: "https://github.com/r0od3x/rentingsite",
   },
   {
-    name: "Casa Dojo: Judo Club Manager",
-    description:
-      "Roster, belt progression, monthly payments and one-click WhatsApp reminders for a real judo dojo, built on file-system storage.",
-    stack: ["React", "Vite", "Node.js", "Express"],
+    name: "Casa Dojo",
+    description: "Roster, belts and payments for a real judo club.",
+    stack: "React · Express",
+    year: "2025",
     repo: "https://github.com/r0od3x/casadojo",
   },
   {
-    name: "Iaido Scoreboard",
-    description:
-      "Keyboard-driven full-screen scoreboard for iaido tournaments: solo and team matches, per-side timers, animated results, undo.",
-    stack: ["Python", "Tkinter", "PyInstaller"],
+    name: "Iaido scoreboard",
+    description: "Keyboard-driven tournament scoreboard, solo and team.",
+    stack: "Python · Tkinter",
+    year: "2025",
     repo: "https://github.com/r0od3x/iaido-scoreboard",
   },
   {
     name: "HM-Helper API",
-    description:
-      "Laravel 12 REST API simulating remote brand servers, with token auth, per-site mock data and PHPUnit feature tests.",
-    stack: ["PHP", "Laravel 12", "PHPUnit"],
+    description: "Laravel mock of remote brand servers, with tests.",
+    stack: "Laravel · PHPUnit",
+    year: "2025",
     repo: "https://github.com/r0od3x/php-api",
   },
 ];
 
-export type Certification = {
-  name: string;
-  issuer: string;
-  year: string;
-  detail?: string;
-};
-
-export const certifications: Certification[] = [
-  {
-    name: "Deep Learning Specialization",
-    issuer: "DeepLearning.AI",
-    year: "2026",
-    detail:
-      "5 courses: Neural Networks & Deep Learning · Improving Deep Neural Networks · Structuring ML Projects · CNNs · Sequence Models",
-  },
-  { name: "CS50x: Introduction to Computer Science", issuer: "HarvardX", year: "2024" },
-  { name: "Agile Project Management", issuer: "Google", year: "2024" },
-];
-
 export type TimelineItem = {
   date: string;
+  year: string;
   title: string;
   org: string;
   description: string;
   points?: string[];
   stack?: string[];
-  kind: "work" | "education" | "milestone" | "project";
+  kind: "work" | "education" | "milestone";
 };
 
-// Chronological: from the start of the degree to the latest internship.
+// Chronological: from the start of the degree to now.
 export const timeline: TimelineItem[] = [
   {
-    date: "2022",
-    title: "Started the engineering program",
+    date: "Sep 2022",
+    year: "2022",
+    title: "Started engineering school",
     org: "EMSI Casablanca",
     kind: "education",
-    description:
-      "Computer Science engineering degree, specializing in AI & Data Science. Class delegate.",
+    description: "Computer Science engineering, later specialising in AI & Data Science. Elected class delegate.",
   },
   {
     date: "2024",
-    title: "2nd place, Coupe du Trône",
-    org: "National judo competition",
+    year: "2024",
+    title: "Silver, Coupe du Trône",
+    org: "National judo championship",
     kind: "milestone",
-    description:
-      "Silver at the national level. I'm also a certified judo referee.",
+    description: "Second place nationally. These days I also referee.",
   },
   {
     date: "Jul – Aug 2024",
+    year: "2024",
     title: "Data & Analytics Intern",
     org: "FedEx",
     kind: "work",
-    description:
-      "Built an HR attendance analytics system and automated KPI reporting.",
-    points: [
-      "Attendance analytics application with Flask and PostgreSQL",
-      "Automated HR KPI reporting through a REST API",
-    ],
-    stack: ["Flask", "PostgreSQL", "REST APIs"],
+    description: "HR attendance analytics and automated KPI reporting.",
+    points: ["Attendance analytics app on Flask + PostgreSQL", "HR KPI reports generated through a REST API"],
+    stack: ["Flask", "PostgreSQL", "REST"],
   },
   {
     date: "2025",
-    title: "Organizer, 11th EMSI Careers Forum",
+    year: "2025",
+    title: "Organiser, 11th Careers Forum",
     org: "EMSI Casablanca",
     kind: "milestone",
-    description:
-      "Helped run the school's flagship careers event: logistics, partners and student outreach.",
+    description: "Logistics, partners and student outreach for the school's biggest event.",
   },
   {
     date: "Jul – Aug 2025",
+    year: "2025",
     title: "Data & AI Automation Intern",
-    org: "GPC (Gharb Papier et Carton)",
+    org: "GPC, Gharb Papier et Carton",
     kind: "work",
-    description:
-      "Automated data flows for a paper and cardboard manufacturer.",
+    description: "Automated the data flows of a paper & cardboard manufacturer.",
     points: [
-      "Automated ETL pipelines: PDF, Excel, XML and REST APIs into PostgreSQL",
-      "OCR pipeline (Tesseract) to extract production data from scanned documents",
-      "Real-time analytics dashboards on top of the consolidated data",
+      "ETL from PDF, Excel, XML and REST into PostgreSQL",
+      "Tesseract OCR for scanned production documents",
+      "Real-time dashboards on top of it all",
     ],
-    stack: ["Python", "PostgreSQL", "Tesseract", "ETL"],
+    stack: ["Python", "PostgreSQL", "Tesseract"],
   },
   {
     date: "Jul – Aug 2026",
+    year: "2026",
     title: "Data Science & AI Intern",
     org: "Crédit du Maroc",
     kind: "work",
-    description:
-      "Built forecasting for a bank's cash inflows and outflows to support budget monitoring.",
+    description: "Forecasting a bank's cash inflows and outflows for budget monitoring.",
     points: [
-      "Prepared, cleaned and transformed historical financial data for predictive modelling",
-      "Built an ML pipeline forecasting cash inflows and outflows",
-      "Engineered temporal lag features to improve forecast performance",
-      "Contributed to the design of a decision-support system for budget tracking",
+      "Cleaned and shaped historical financial data",
+      "ML pipeline forecasting inflows and outflows",
+      "Lag features to sharpen the forecasts",
     ],
     stack: ["Python", "Pandas", "Scikit-learn"],
   },
   {
     date: "Now",
-    title: "Final year, open to what's next",
+    year: "Now",
+    title: "Final year",
     org: "2026 → 2027",
     kind: "milestone",
-    description:
-      "Looking for an end-of-studies project (PFE) or internship in AI / ML or data science.",
+    description: "Looking for an end-of-studies project (PFE) or internship in ML, computer vision or data.",
   },
 ];
 
-export const educationEntries = [
-  {
-    title: "Engineering Degree: Computer Science, AI & Data Science",
-    school: "EMSI Casablanca",
-    period: "2022 – present",
-    detail:
-      "Machine learning, deep learning, big data processing and software engineering. Class delegate.",
-  },
-  {
-    title: "Baccalaureate in Physical Sciences",
-    school: "Morocco",
-    period: "2022",
-  },
-];
-
-export const educationFocus = [
-  "Machine Learning & Deep Learning",
-  "Multi-Agent Systems & Generative AI",
-  "Big Data Processing & Data Engineering",
-  "Software Engineering & Full-Stack Development",
+export const education = [
+  { year: "2022 → 27", title: "Engineering degree, Computer Science (AI & Data Science)", place: "EMSI Casablanca" },
+  { year: "2026", title: "Deep Learning Specialization, 5 courses", place: "DeepLearning.AI" },
+  { year: "2024", title: "CS50x: Introduction to Computer Science", place: "HarvardX" },
+  { year: "2024", title: "Agile Project Management", place: "Google" },
+  { year: "2022", title: "Baccalaureate, Physical Sciences", place: "Morocco" },
 ];
 
 export const contact = {
-  eyebrow: "Get in touch",
-  title: "Let's build something intelligent.",
+  title: "Let's talk.",
   description:
-    "Open to AI / ML and data science internships, end-of-studies projects (PFE) and collaborations. Based in Casablanca and comfortable working in Arabic, French and English.",
+    "I'm looking for an end-of-studies project (PFE) or an internship in machine learning, computer vision or data, for 2026–27. Email is the fastest way to reach me.",
 };

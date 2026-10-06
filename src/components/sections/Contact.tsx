@@ -1,94 +1,158 @@
-import { useEffect, useRef } from "react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { RevealText } from "@/components/ui/RevealText";
-import { ScrambleText } from "@/components/ui/ScrambleText";
-import { SpinningBadge } from "@/components/ui/SpinningBadge";
-import { MagneticButton } from "@/components/ui/MagneticButton";
+import { useEffect, useRef, useState } from "react";
+import { gsap, SplitText, prefersReducedMotion } from "@/lib/gsap";
+import { scrollToTarget } from "@/lib/scroll";
+import { useFitText } from "@/hooks/useFitText";
+import { SectionLabel } from "@/components/ui/SectionLabel";
+import { RollText } from "@/components/ui/RollText";
+import { LiveClock } from "@/components/ui/LiveClock";
 import { contact, profile } from "@/data/content";
-import { ArrowUpRight, Mail } from "lucide-react";
-import { GithubMark } from "@/components/ui/BrandIcons";
 
+const LINKS = [
+  { label: "GitHub", href: profile.socials.github, note: "r0od3x", external: true },
+  { label: "LinkedIn", href: profile.socials.linkedin, note: "Mohamed Reda Ghalbi", external: true },
+  { label: "Résumé", href: profile.socials.resume, note: "PDF, 1 page", external: false },
+];
+
+/** Contact + footer, printed on a light sheet that slides over the page. */
 export function Contact() {
   const sectionRef = useRef<HTMLElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const nameRef = useRef<HTMLParagraphElement>(null);
+  const [copied, setCopied] = useState(false);
+
+  useFitText(nameRef);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
+    const splits: SplitText[] = [];
     const ctx = gsap.context(() => {
-      // The card opens up from a smaller rounded window as it scrolls in.
-      gsap.fromTo(
-        cardRef.current,
-        { scale: 0.84, clipPath: "inset(6% 10% 6% 10% round 64px)" },
-        {
-          scale: 1,
-          clipPath: "inset(0% 0% 0% 0% round 24px)",
-          ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "top 25%", scrub: 0.6 },
-        }
-      );
-      gsap.from(".contact-cta > *", {
-        y: 40,
-        scale: 0.8,
+      const title = SplitText.create(titleRef.current, { type: "chars", mask: "lines" });
+      const name = SplitText.create(nameRef.current, { type: "chars" });
+      splits.push(title, name);
+
+      gsap.from(title.chars, {
+        yPercent: 110,
+        duration: 1.3,
+        stagger: 0.04,
+        scrollTrigger: { trigger: titleRef.current, start: "top 85%", once: true },
+      });
+      gsap.from(".ct-reveal", {
+        y: 30,
         autoAlpha: 0,
-        duration: 0.9,
-        ease: "back.out(1.8)",
-        stagger: 0.1,
-        scrollTrigger: { trigger: ".contact-cta", start: "top 92%", once: true },
+        duration: 1,
+        stagger: 0.07,
+        scrollTrigger: { trigger: ".ct-body", start: "top 85%", once: true },
+      });
+      // The footer name rises out of the bottom edge as the page bottoms out.
+      gsap.from(name.chars, {
+        yPercent: 100,
+        ease: "none",
+        stagger: { each: 0.05, from: "center" },
+        scrollTrigger: { trigger: ".ct-footer", start: "top bottom", end: "bottom bottom", scrub: true },
       });
     }, sectionRef);
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      splits.forEach((s) => s.revert());
+    };
   }, []);
 
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(profile.email);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.location.href = `mailto:${profile.email}`;
+    }
+  };
+
   return (
-    <section ref={sectionRef} id="contact" className="container-px mx-auto max-w-7xl py-32 md:py-48">
-      <div
-        ref={cardRef}
-        className="spotlight relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container px-8 py-20 text-center md:px-16 md:py-28"
+    <section
+      ref={sectionRef}
+      id="contact"
+      className="page-x relative z-10 overflow-hidden rounded-t-[28px] bg-paper pt-24 text-on-paper md:rounded-t-[44px] md:pt-32"
+    >
+      <SectionLabel index="06" label="Contact" note={profile.availability} tone="paper" />
+
+      <h2
+        ref={titleRef}
+        className="mt-12 text-[clamp(4.5rem,15vw,15rem)] font-medium leading-[0.9] tracking-[-0.06em] md:mt-16"
       >
-        <SpinningBadge
-          text="Let's talk · Open to work · "
-          className="absolute right-8 top-8 hidden w-28 opacity-80 md:block"
-        >
-          <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-tertiary" />
-        </SpinningBadge>
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.12] blur-[100px]"
-          style={{ background: "radial-gradient(circle, var(--color-tertiary), transparent 70%)" }}
-        />
+        Let's <span className="serif-i tracking-[-0.025em] text-accent-ink">talk.</span>
+      </h2>
 
-        <ScrambleText className="eyebrow relative">{contact.eyebrow}</ScrambleText>
-
-        <RevealText
-          as="h2"
-          className="relative mx-auto mt-6 max-w-3xl text-balance font-sans text-[clamp(2.2rem,5.5vw,4rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-on-surface"
-        >
-          {contact.title}
-        </RevealText>
-
-        <p className="reveal-fade relative mx-auto mt-6 max-w-lg text-balance text-base leading-relaxed text-on-surface-variant">
+      <div className="ct-body grid-12 mt-14 gap-y-12 md:mt-20">
+        <p className="ct-reveal col-span-12 max-w-[40ch] text-[18px] leading-relaxed text-on-paper-2 md:col-span-5">
           {contact.description}
         </p>
 
-        <div className="contact-cta relative mt-10 flex flex-wrap items-center justify-center gap-4">
-          <MagneticButton variant="primary" href={`mailto:${profile.email}`}>
-            <Mail size={15} /> Email me
-          </MagneticButton>
-          <MagneticButton variant="secondary" href={profile.socials.linkedin} external>
-            LinkedIn <ArrowUpRight size={15} />
-          </MagneticButton>
-          <MagneticButton variant="secondary" href={profile.socials.github} external>
-            <GithubMark size={15} /> GitHub
-          </MagneticButton>
-        </div>
+        <div className="col-span-12 md:col-span-7">
+          <p className="ct-reveal label text-on-paper-2">Email</p>
+          <div className="ct-reveal mt-3 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <a
+              href={`mailto:${profile.email}`}
+              data-cursor="Write"
+              className="draw-line break-all pb-1 text-[clamp(1.35rem,2.7vw,2.5rem)] font-medium tracking-[-0.03em]"
+            >
+              {profile.email}
+            </a>
+            <button
+              type="button"
+              onClick={copyEmail}
+              className="label rounded-full border border-on-paper/20 px-4 py-2 transition-colors hover:border-on-paper hover:bg-on-paper hover:text-paper"
+            >
+              {copied ? "Copied ✓" : "Copy"}
+            </button>
+          </div>
 
-        <a
-          href={`mailto:${profile.email}`}
-          className="cursor-hover reveal-fade relative mt-8 inline-block font-mono text-sm text-on-surface-faint transition-colors hover:text-tertiary"
-        >
-          {profile.email}
-        </a>
+          <ul className="mt-12 border-t border-on-paper/15">
+            {LINKS.map((link) => (
+              <li key={link.label} className="ct-reveal border-b border-on-paper/15">
+                <a
+                  href={link.href}
+                  {...(link.external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : { download: "Mohamed-Reda-Ghalbi-Resume.pdf" })}
+                  className="roll-host group flex items-center justify-between gap-4 py-5"
+                >
+                  <span className="text-[clamp(1.3rem,2vw,1.75rem)] font-medium tracking-[-0.02em]">
+                    <RollText>{link.label}</RollText>
+                  </span>
+                  <span className="label flex items-center gap-4 text-on-paper-2">
+                    <span className="hidden sm:inline">{link.note}</span>
+                    <span className="text-[16px] transition-transform duration-500 group-hover:-translate-y-1 group-hover:translate-x-1">
+                      {link.external ? "↗" : "↓"}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
+
+      <footer className="ct-footer mt-28 md:mt-40">
+        <div className="label grid grid-cols-2 gap-x-6 gap-y-3 border-t border-on-paper/15 pt-5 text-on-paper-2 md:grid-cols-4">
+          <span>© {new Date().getFullYear()} {profile.name}</span>
+          <span>
+            Casablanca <LiveClock className="text-on-paper" />
+          </span>
+          <span>Built with React & GSAP</span>
+          <button type="button" onClick={() => scrollToTarget(0)} className="roll-host text-left md:text-right">
+            <RollText>Back to top ↑</RollText>
+          </button>
+        </div>
+        <div className="mt-6 overflow-hidden">
+          <p
+            ref={nameRef}
+            aria-hidden
+            className="-mb-[0.14em] inline-block whitespace-nowrap font-semibold leading-[1] tracking-[-0.06em]"
+          >
+            Mohamed Reda Ghalbi
+          </p>
+        </div>
+      </footer>
     </section>
   );
 }
