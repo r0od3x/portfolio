@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors: matched to github.com/r0od3x (GitHub-dark navy base,
+     violet -> blue -> cyan accents from the profile header). */
+  --color-surface: #0A0D17;
+  --color-surface-dim: #06080F;
+  --color-surface-bright: #1C2238;
+  --color-surface-container-lowest: #06080F;
+  --color-surface-container-low: #0D111D;
+  --color-surface-container: #111626;
+  --color-surface-container-high: #171D31;
+  --color-surface-container-highest: #20283F;
+  --color-on-surface: #E2E8F0;
+  --color-on-surface-variant: #94A3B8;
+  --color-on-surface-faint: #5B6780;
+  --color-outline: #2B3150;
+  --color-outline-variant: #1A1F35;
+  --color-primary: #E2E8F0;
+  --color-on-primary: #0A0D17;
+  /* secondary = cyan pulse, tertiary = violet (main accent) */
+  --color-secondary: #22D3EE;
+  --color-tertiary: #A78BFA;
+  --color-tertiary-container: #2A1D5C;
+  --color-on-tertiary-container: #C4B5FD;
+  --color-accent-blue: #60A5FA;
+  --color-accent-deep: #7C3AED;
+  --color-success: #34D399;
+  --color-error: #F87171;
+
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Spacing */
+  --spacing-section: 160px;
+
+  /* Breakpoints */
+  --breakpoint-3xl: 1920px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-outline-variant);
+  }
+
+  html {
+    background-color: var(--color-surface);
+    scroll-behavior: auto;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-tertiary);
+    color: var(--color-on-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-tertiary);
+    outline-offset: 3px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-container-highest);
+    border-radius: 999px;
+    border: 2px solid var(--color-surface);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-outline);
+  }
+}
+
+@layer utilities {
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-tertiary);
+  }
+
+  .container-px {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  @media (min-width: 768px) {
+    .container-px {
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .grain-bg {
+    position: relative;
+  }
+  .grain-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .reveal-mask {
+    overflow: hidden;
+  }
+
+  /* Cursor-following accent border + inner glow (driven by useSpotlight). */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+  .spotlight::before,
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .spotlight::before {
+    z-index: 2;
+    padding: 1px;
+    background: radial-gradient(
+      380px circle at var(--mx, -999px) var(--my, -999px),
+      color-mix(in srgb, var(--color-tertiary) 85%, transparent),
+      color-mix(in srgb, var(--color-secondary) 35%, transparent) 25%,
+      transparent 45%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+  .spotlight::after {
+    z-index: -1;
+    background: radial-gradient(
+      520px circle at var(--mx, -999px) var(--my, -999px),
+      color-mix(in srgb, var(--color-tertiary) 9%, transparent),
+      transparent 45%
+    );
+  }
+  @media (pointer: fine) {
+    .spotlight-group:hover .spotlight::before,
+    .spotlight:hover::before,
+    .spotlight:hover::after {
+      opacity: 1;
+    }
+  }
+
+  /* The profile's signature violet -> blue -> cyan text gradient. */
+  .text-brand-gradient {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-tertiary),
+      var(--color-accent-blue) 50%,
+      var(--color-secondary)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* While SplitText has it split, a gradient on the parent wouldn't follow
+     the moving characters, so fall back to solid violet. */
+  .text-brand-gradient:has(div) {
+    background-image: none;
+    color: var(--color-tertiary);
+  }
+
+  /* Vertical white-to-violet fade for the footer name. Applied per character
+     once SplitText has split it, since background-clip doesn't follow
+     transformed children. */
+  .text-fade-accent,
+  .fade-accent-char {
+    background-image: linear-gradient(
+      180deg,
+      var(--color-on-surface) 10%,
+      color-mix(in srgb, var(--color-tertiary) 75%, transparent) 62%,
+      color-mix(in srgb, var(--color-secondary) 25%, transparent) 85%,
+      transparent 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-fade-accent:has(.fade-accent-char) {
+    background-image: none;
+  }
+
+  .bg-brand-gradient {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-tertiary),
+      var(--color-accent-blue),
+      var(--color-secondary)
+    );
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .caret {
+    animation: blink 1s steps(1) infinite;
+  }
+
+  /* Outlined display type for the marquee and footer. */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--color-outline);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 768px) and (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
